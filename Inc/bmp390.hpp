@@ -5,11 +5,29 @@
  *      Author: farhan
  */
 
-#ifndef BMP390_INC_BMP390_HPP_
-#define BMP390_INC_BMP390_HPP_
+#ifndef BMP390_HPP_
+#define BMP390_HPP_
 
+#include "bmp390-port.hpp"
+#include "bmp390-reg.hpp"
 
+typedef BMP390_RET_TYPE (*BMP390_ReadFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
+typedef BMP390_RET_TYPE (*BMP390_WriteFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
+typedef BMP390_RET_TYPE (*BMP390_DelayMsFuncPtr)(void *hInterface, uint32_t delayMs);
 
+class BMP390 {
+	private:
+		void *hInterface;
+		BMP390_ReadFuncPtr read;
+		BMP390_WriteFuncPtr write;
+		BMP390_DelayMsFuncPtr delayMs;
 
+		uint8_t chipAddress;
+	public:
+		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write, BMP390_DelayMsFuncPtr delay) :
+			hInterface(hInterface), read(read), write(write), delayMs(delay)
+		{
 
-#endif /* BMP390_INC_BMP390_HPP_ */
+		}
+};
+#endif /* BMP390_HPP_ */
