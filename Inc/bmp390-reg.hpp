@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-namespace BMP390 {
+namespace bmp390 {
 
 	constexpr uint8_t REG_CHIP_ID = 0x00;
 	constexpr uint8_t REG_REV_ID = 0x01;
@@ -80,7 +80,7 @@ namespace BMP390 {
 	constexpr uint8_t REG_INT_CTRL_DRDY_EN = (1 << 6);
 
 	constexpr uint8_t REG_IF_CONF_SPI3 = (1 << 0);
-	constexpr uint8_t REG_IF_CONF_I2C_WDT_SEL = (1 << 1);
+	constexpr uint8_t REG_IF_CONF_I2C_WDT_EN = (1 << 1);
 	constexpr uint8_t REG_IF_CONF_I2C_WDT_SEL = (1 << 2);
 
 	constexpr uint8_t REG_PWR_CTRL_PRESS_EN = (1 << 0);
@@ -110,6 +110,6 @@ namespace BMP390 {
     constexpr uint8_t CHIP_ID = 0x60;
     constexpr uint8_t REV_ID = 0x01;
 
-}  // namespace BMP390
+}  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */
