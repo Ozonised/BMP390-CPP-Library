@@ -27,7 +27,10 @@ class BMP390 {
 		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write, BMP390_DelayMsFuncPtr delay) :
 			hInterface(hInterface), read(read), write(write), delayMs(delay)
 		{
-
+			chipAddress = 0;
 		}
+
+		void Init(bool CSBPinState, bool SDOPinState);
+		BMP390_RET_TYPE IsPresent(void);
 };
 #endif /* BMP390_HPP_ */
