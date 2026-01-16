@@ -110,6 +110,12 @@ namespace bmp390 {
     constexpr uint8_t CHIP_ID = 0x60;
     constexpr uint8_t REV_ID = 0x01;
 
+    enum class PowerMode : uint8_t {
+    	Sleep = 0,
+    	Forced,
+		Normal
+    };
+
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */

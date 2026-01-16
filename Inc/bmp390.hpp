@@ -32,5 +32,6 @@ class BMP390 {
 
 		void Init(bool CSBPinState, bool SDOPinState);
 		BMP390_RET_TYPE IsPresent(void);
+		BMP390_RET_TYPE SetPowerMode(bmp390::PowerMode mode);
 };
 #endif /* BMP390_HPP_ */
