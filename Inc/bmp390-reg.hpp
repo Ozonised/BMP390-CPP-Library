@@ -116,6 +116,37 @@ namespace bmp390 {
 		Normal
     };
 
+    enum class TempPressOversamlping : uint8_t {
+    	x1 = 0,
+		x2,
+		x4,
+		x8,
+		x16,
+		x32
+    };
+
+    enum class TempPressODR : uint8_t {
+    	ODR_200Hz = 0,
+    	ODR_100Hz,
+		ODR_50Hz,
+		ODR_25Hz,
+		ODR_12p5Hz,
+		ODR_6p25Hz,
+		ODR_3p1Hz,
+		ODR_1p5Hz,
+		ODR_0p78Hz,
+		ODR_0p39Hz,
+		ODR_0p2Hz,
+		ODR_0p1Hz,
+		ODR_0p05Hz,
+		ODR_0p02Hz,
+		ODR_0p01Hz,
+		ODR_0p006Hz,
+		ODR_0p003Hz,
+		ODR_0p0015Hz,
+    };
+
+
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */
