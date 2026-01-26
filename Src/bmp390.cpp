@@ -191,3 +191,20 @@ BMP390_RET_TYPE BMP390::GetStatus(uint8_t &status)
 	return ret;
 }
 
+BMP390_RET_TYPE BMP390::IsBusy(void)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t status = 0;
+	if (GetStatus(status) == BMP390_RET_TYPE_SUCCESS)
+	{
+		if (status & bmp390::REG_STATUS_CMD_RDY)
+		{
+			ret = BMP390_RET_TYPE_SUCCESS;
+		}
+		else
+		{
+			ret = BMP390_RET_TYPE_BUSY;
+		}
+	}
+	return ret;
+}
