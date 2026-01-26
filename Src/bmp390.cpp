@@ -178,8 +178,16 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversamlping
 	return ret;
 }
 
-BMP390_RET_TYPE BMP390::SetTempPressODR(bmp390::TempPressODR odr)
+BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 {
 	uint8_t ODR = static_cast<uint8_t>(odr);
 	return write(hInterface, chipAddress, bmp390::REG_ODR, &ODR, 1);
 }
+
+BMP390_RET_TYPE BMP390::GetStatus(uint8_t &status)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	ret = read(hInterface, chipAddress, bmp390::REG_STATUS, &status, 1);
+	return ret;
+}
+

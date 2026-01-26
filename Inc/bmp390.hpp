@@ -23,6 +23,7 @@ class BMP390 {
 		BMP390_DelayMsFuncPtr delayMs;
 
 		uint8_t chipAddress;
+		BMP390_RET_TYPE GetStatus(uint8_t &status);
 	public:
 		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write, BMP390_DelayMsFuncPtr delay) :
 			hInterface(hInterface), read(read), write(write), delayMs(delay)
@@ -37,6 +38,7 @@ class BMP390 {
 		BMP390_RET_TYPE ToggleTemperatureMeasurement(bool n);
 		BMP390_RET_TYPE SetPressureOversampling(bmp390::TempPressOversamlping osrp);
 		BMP390_RET_TYPE SetTemperatureOversampling(bmp390::TempPressOversamlping osrt);
-		BMP390_RET_TYPE SetTempPressODR(bmp390::TempPressODR odr);
+		BMP390_RET_TYPE SetOutputDataRate(bmp390::TempPressODR odr);
+		BMP390_RET_TYPE IsBusy(void);
 };
 #endif /* BMP390_HPP_ */
