@@ -158,14 +158,14 @@ BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
  * measurement resolution and noise performance at the cost of increased
  * conversion time and power consumption.
  *
- * @param osrp one of TempPressOversamlping values.
+ * @param osrp one of TempPressOversampling values.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
  *
  * @note Refer to table 6 in section 3.4.1 of the datasheet
  */
-BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversamlping osrp)
+BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling osrp)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t osr = 0;
@@ -176,26 +176,26 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversamlping os
 
 		switch (osrp)
 		{
-		case bmp390::TempPressOversamlping::x1:
+		case bmp390::TempPressOversampling::x1:
 			break;
 
-		case bmp390::TempPressOversamlping::x2:
+		case bmp390::TempPressOversampling::x2:
 			osr |= bmp390::REG_OSR_OSR_P_1;
 			break;
 
-		case bmp390::TempPressOversamlping::x4:
+		case bmp390::TempPressOversampling::x4:
 			osr |= bmp390::REG_OSR_OSR_P_2;
 			break;
 
-		case bmp390::TempPressOversamlping::x8:
+		case bmp390::TempPressOversampling::x8:
 			osr |= (bmp390::REG_OSR_OSR_P_1 | bmp390::REG_OSR_OSR_P_0);
 			break;
 
-		case bmp390::TempPressOversamlping::x16:
+		case bmp390::TempPressOversampling::x16:
 			osr |= bmp390::REG_OSR_OSR_P_2;
 			break;
 
-		case bmp390::TempPressOversamlping::x32:
+		case bmp390::TempPressOversampling::x32:
 			osr |= (bmp390::REG_OSR_OSR_P_2 | bmp390::REG_OSR_OSR_P_0);
 			break;
 
@@ -215,14 +215,14 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversamlping os
  * measurement resolution and noise performance at the cost of increased
  * conversion time and power consumption.
  *
- * @param osrp one of TempPressOversamlping values.
+ * @param osrp one of TempPressOversampling values.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
  *
  * @note Refer to table 6 & 7 in section 3.4.1 & 3.4.2 of the datasheet
  */
-BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversamlping osrt)
+BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling osrt)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t osr = 0;
@@ -233,26 +233,26 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversamlping
 
 		switch (osrt)
 		{
-		case bmp390::TempPressOversamlping::x1:
+		case bmp390::TempPressOversampling::x1:
 			break;
 
-		case bmp390::TempPressOversamlping::x2:
+		case bmp390::TempPressOversampling::x2:
 			osr |= bmp390::REG_OSR_OSR_T_1;
 			break;
 
-		case bmp390::TempPressOversamlping::x4:
+		case bmp390::TempPressOversampling::x4:
 			osr |= bmp390::REG_OSR_OSR_T_2;
 			break;
 
-		case bmp390::TempPressOversamlping::x8:
+		case bmp390::TempPressOversampling::x8:
 			osr |= (bmp390::REG_OSR_OSR_T_1 | bmp390::REG_OSR_OSR_T_0);
 			break;
 
-		case bmp390::TempPressOversamlping::x16:
+		case bmp390::TempPressOversampling::x16:
 			osr |= bmp390::REG_OSR_OSR_T_2;
 			break;
 
-		case bmp390::TempPressOversamlping::x32:
+		case bmp390::TempPressOversampling::x32:
 			osr |= (bmp390::REG_OSR_OSR_T_2 | bmp390::REG_OSR_OSR_T_0);
 			break;
 

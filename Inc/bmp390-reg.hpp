@@ -116,7 +116,7 @@ namespace bmp390 {
 		Normal
     };
 
-    enum class TempPressOversamlping : uint8_t {
+    enum class TempPressOversampling : uint8_t {
     	x1 = 0, // 16 bit resolution, 2.64Pa/0.005C per LSB
 		x2,		// 17 bit resolution, 1.32Pa/0.0025C per LSB
 		x4,		// 18 bit resolution, 0.66Pa/0.0012C per LSB
