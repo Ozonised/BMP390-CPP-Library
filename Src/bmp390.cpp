@@ -7,6 +7,23 @@
 
 #include "bmp390.hpp"
 
+/**
+ * @brief Determine I2C address.
+ *
+ * This function configures the BMP390 communication parameters based
+ * on the logic levels of the CSB and SDO pins.
+ *
+ * When CSB is HIGH, the BMP390 operates in I2C mode. In this mode,
+ * the I2C slave address is selected by the SDO pin:
+ *  - SDO = LOW  -> I2C address 0x76
+ *  - SDO = HIGH -> I2C address 0x77
+ *
+ * @param CSBPinState  Logic level of the CSB pin (true = HIGH).
+ * @param SDOPinState  Logic level of the SDO pin (true = HIGH).
+ *
+ * @note If CSBPinState is LOW, the device is expected to operate in SPI
+ *       mode and the I2C address is not configured by this function.
+ */
 void BMP390::Init(bool CSBPinState, bool SDOPinState)
 {
 	if (CSBPinState)
@@ -15,6 +32,12 @@ void BMP390::Init(bool CSBPinState, bool SDOPinState)
 	}
 }
 
+/**
+ * @brief Check for presence of a BMP390 sensor on the bus.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  BMP390 device detected and verified.
+ * @retval BMP390_RET_TYPE_FAILURE  Device not detected or communication failed.
+ */
 BMP390_RET_TYPE BMP390::IsPresent(void)
 {
 	uint8_t chipId = 0, revId = 0, ret = BMP390_RET_TYPE_FAILURE;
@@ -32,6 +55,19 @@ BMP390_RET_TYPE BMP390::IsPresent(void)
 	return ret;
 }
 
+/**
+ * @brief Set the power mode of the BMP390 sensor.
+ *
+ * Supported power modes:
+ *  - Sleep  : Sensor is in sleep mode (no measurements)
+ *  - Forced : Single measurement is triggered
+ *  - Normal : Continuous measurement mode
+ *
+ * @param mode one of PowerMode values
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Power mode configured successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
+ */
 BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -60,6 +96,16 @@ BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
 	return ret;
 }
 
+/**
+ * @brief Enable/Disable pressure measurement
+ *
+ * @param n
+ * 			- 1 : enable pressure measurement
+ * 			- 0 : disable pressure measurement
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Success
+ * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
+ */
 BMP390_RET_TYPE BMP390::TogglePressureMeasurement(bool n)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -77,6 +123,16 @@ BMP390_RET_TYPE BMP390::TogglePressureMeasurement(bool n)
 	return ret;
 }
 
+/**
+ * @brief Enable/Disable temperature measurement
+ *
+ * @param n
+ * 			- 1 : enable temperature measurement
+ * 			- 0 : disable temperature measurement
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Success
+ * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
+ */
 BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -94,6 +150,21 @@ BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
 	return ret;
 }
 
+/**
+ * @brief Configure pressure oversampling setting.
+ *
+ * This function sets the pressure oversampling ratio by configuring
+ * the OSR_P bits in the OSR register. Higher oversampling ratios improve
+ * measurement resolution and noise performance at the cost of increased
+ * conversion time and power consumption.
+ *
+ * @param osrp one of TempPressOversamlping values.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
+ *
+ * @note Refer to table 6 in section 3.4.1 of the datasheet
+ */
 BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversamlping osrp)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -136,6 +207,21 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversamlping os
 	return ret;
 }
 
+/**
+ * @brief Configure temperature oversampling setting.
+ *
+ * This function sets the temperature oversampling ratio by configuring
+ * the OSR_T bits in the OSR register. Higher oversampling ratios improve
+ * measurement resolution and noise performance at the cost of increased
+ * conversion time and power consumption.
+ *
+ * @param osrp one of TempPressOversamlping values.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
+ *
+ * @note Refer to table 6 & 7 in section 3.4.1 & 3.4.2 of the datasheet
+ */
 BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversamlping osrt)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -208,3 +294,4 @@ BMP390_RET_TYPE BMP390::IsBusy(void)
 	}
 	return ret;
 }
+
