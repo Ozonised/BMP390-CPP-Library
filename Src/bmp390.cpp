@@ -18,8 +18,8 @@
  *  - SDO = LOW  -> I2C address 0x76
  *  - SDO = HIGH -> I2C address 0x77
  *
- * @param CSBPinState  Logic level of the CSB pin (true = HIGH).
- * @param SDOPinState  Logic level of the SDO pin (true = HIGH).
+ * @param[in] CSBPinState  Logic level of the CSB pin (true = HIGH).
+ * @param[in] SDOPinState  Logic level of the SDO pin (true = HIGH).
  *
  * @note If CSBPinState is LOW, the device is expected to operate in SPI
  *       mode and the I2C address is not configured by this function.
@@ -63,7 +63,7 @@ BMP390_RET_TYPE BMP390::IsPresent(void)
  *  - Forced : Single measurement is triggered
  *  - Normal : Continuous measurement mode
  *
- * @param mode one of PowerMode values
+ * @param[in] mode one of PowerMode values
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Power mode configured successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
@@ -99,7 +99,7 @@ BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
 /**
  * @brief Enable/Disable pressure measurement
  *
- * @param n
+ * @param[in] n
  * 			- 1 : enable pressure measurement
  * 			- 0 : disable pressure measurement
  *
@@ -126,7 +126,7 @@ BMP390_RET_TYPE BMP390::TogglePressureMeasurement(bool n)
 /**
  * @brief Enable/Disable temperature measurement
  *
- * @param n
+ * @param[in] n
  * 			- 1 : enable temperature measurement
  * 			- 0 : disable temperature measurement
  *
@@ -158,7 +158,7 @@ BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
  * measurement resolution and noise performance at the cost of increased
  * conversion time and power consumption.
  *
- * @param osrp one of TempPressOversampling values.
+ * @param[in] osrp one of TempPressOversampling values.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
@@ -174,34 +174,8 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling os
 	{
 		osr &= ~(bmp390::REG_OSR_OSR_P_0 | bmp390::REG_OSR_OSR_P_1 | bmp390::REG_OSR_OSR_P_2);
 
-		switch (osrp)
-		{
-		case bmp390::TempPressOversampling::x1:
-			break;
+		osr |= (static_cast<uint8_t>(osrp) <<bmp390::REG_OSR_OSR_P_POS);
 
-		case bmp390::TempPressOversampling::x2:
-			osr |= bmp390::REG_OSR_OSR_P_0;
-			break;
-
-		case bmp390::TempPressOversampling::x4:
-			osr |= bmp390::REG_OSR_OSR_P_1;
-			break;
-
-		case bmp390::TempPressOversampling::x8:
-			osr |= (bmp390::REG_OSR_OSR_P_1 | bmp390::REG_OSR_OSR_P_0);
-			break;
-
-		case bmp390::TempPressOversampling::x16:
-			osr |= bmp390::REG_OSR_OSR_P_2;
-			break;
-
-		case bmp390::TempPressOversampling::x32:
-			osr |= (bmp390::REG_OSR_OSR_P_2 | bmp390::REG_OSR_OSR_P_0);
-			break;
-
-		default:
-			break;
-		}
 		ret = write(hInterface, chipAddress, bmp390::REG_OSR, &osr, 1);
 	}
 	return ret;
@@ -215,7 +189,7 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling os
  * measurement resolution and noise performance at the cost of increased
  * conversion time and power consumption.
  *
- * @param osrp one of TempPressOversampling values.
+ * @param[in] osrp one of TempPressOversampling values.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
@@ -231,34 +205,8 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
 	{
 		osr &= ~(bmp390::REG_OSR_OSR_T_0 | bmp390::REG_OSR_OSR_T_1 | bmp390::REG_OSR_OSR_T_2);
 
-		switch (osrt)
-		{
-		case bmp390::TempPressOversampling::x1:
-			break;
+		osr |= (static_cast<uint8_t>(osrt) << bmp390::REG_OSR_OSR_T_POS);
 
-		case bmp390::TempPressOversampling::x2:
-			osr |= bmp390::REG_OSR_OSR_T_0;
-			break;
-
-		case bmp390::TempPressOversampling::x4:
-			osr |= bmp390::REG_OSR_OSR_T_1;
-			break;
-
-		case bmp390::TempPressOversampling::x8:
-			osr |= (bmp390::REG_OSR_OSR_T_1 | bmp390::REG_OSR_OSR_T_0);
-			break;
-
-		case bmp390::TempPressOversampling::x16:
-			osr |= bmp390::REG_OSR_OSR_T_2;
-			break;
-
-		case bmp390::TempPressOversampling::x32:
-			osr |= (bmp390::REG_OSR_OSR_T_2 | bmp390::REG_OSR_OSR_T_0);
-			break;
-
-		default:
-			break;
-		}
 		ret = write(hInterface, chipAddress, bmp390::REG_OSR, &osr, 1);
 	}
 	return ret;
@@ -272,7 +220,7 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
  * determines how frequently new measurement results are generated
  * when the sensor is operating in Normal mode.
  *
- * @param odr Desired output data rate setting.
+ * @param[in] odr Desired output data rate setting.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Output data rate configured successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register write failed.
@@ -290,7 +238,7 @@ BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 /**
  * @brief Read the BMP390 status register.
  *
- * @param status Reference to a variable where the status register
+ * @param[out] status Reference to a variable where the status register
  *               value will be stored.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Status register read successfully.
@@ -362,43 +310,10 @@ BMP390_RET_TYPE BMP390::SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coe
 	if (read(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		config &= ~(bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0);
-		switch (coef) {
-			case bmp390::IIRFilterCoefficient::coef0:
-				break;
 
-			case bmp390::IIRFilterCoefficient::coef1:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_0;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef3:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_1;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef7:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef15:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_2;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef31:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_0;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef63:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1;
-				break;
-
-			case bmp390::IIRFilterCoefficient::coef127:
-				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0;
-				break;
-			default:
-				break;
-		}
+		config |= (static_cast<uint8_t>(coef) << bmp390::REG_CONFIG_IIR_FILTER_POS);
 
 		ret = write(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1);
 	}
-
 	return ret;
 }

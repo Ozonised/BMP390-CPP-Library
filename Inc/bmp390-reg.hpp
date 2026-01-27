@@ -88,10 +88,12 @@ namespace bmp390 {
 	constexpr uint8_t REG_PWR_CTRL_MODE_0 = (1 << 4);
 	constexpr uint8_t REG_PWR_CTRL_MODE_1 = (1 << 5);
 
+	constexpr uint8_t REG_OSR_OSR_P_POS = 0;
 	constexpr uint8_t REG_OSR_OSR_P_0 = (1 << 0);
 	constexpr uint8_t REG_OSR_OSR_P_1 = (1 << 1);
 	constexpr uint8_t REG_OSR_OSR_P_2 = (1 << 2);
 
+	constexpr uint8_t REG_OSR_OSR_T_POS = 3;
 	constexpr uint8_t REG_OSR_OSR_T_0 = (1 << 3);
 	constexpr uint8_t REG_OSR_OSR_T_1 = (1 << 4);
 	constexpr uint8_t REG_OSR_OSR_T_2 = (1 << 5);
@@ -103,6 +105,7 @@ namespace bmp390 {
 	constexpr uint8_t REG_ODR_ODR_SEL_4 = (1 << 4);
 
 	constexpr uint8_t REG_CONFIG_SHORT_IN = (1 << 0);
+	constexpr uint8_t REG_CONFIG_IIR_FILTER_POS = 1;
     constexpr uint8_t REG_CONFIG_IIR_FILTER_0 = (1 << 1);
     constexpr uint8_t REG_CONFIG_IIR_FILTER_1 = (1 << 2);
     constexpr uint8_t REG_CONFIG_IIR_FILTER_2 = (1 << 3);
@@ -162,8 +165,8 @@ namespace bmp390 {
 		coef31,
 		coef63,
 		coef127
-
     };
+
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */

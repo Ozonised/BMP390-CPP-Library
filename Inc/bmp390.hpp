@@ -33,14 +33,14 @@ class BMP390 {
 
 		void Init(bool CSBPinState, bool SDOPinState);
 		BMP390_RET_TYPE IsPresent(void);
+		BMP390_RET_TYPE IsBusy(void);
 		BMP390_RET_TYPE SetPowerMode(bmp390::PowerMode mode);
-		BMP390_RET_TYPE TogglePressureMeasurement(bool n);
-		BMP390_RET_TYPE ToggleTemperatureMeasurement(bool n);
 		BMP390_RET_TYPE SetPressureOversampling(bmp390::TempPressOversampling osrp);
 		BMP390_RET_TYPE SetTemperatureOversampling(bmp390::TempPressOversampling osrt);
 		BMP390_RET_TYPE SetOutputDataRate(bmp390::TempPressODR odr);
-		BMP390_RET_TYPE IsBusy(void);
-		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
 		BMP390_RET_TYPE SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coef);
+		BMP390_RET_TYPE TogglePressureMeasurement(bool n);
+		BMP390_RET_TYPE ToggleTemperatureMeasurement(bool n);
+		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
 };
 #endif /* BMP390_HPP_ */
