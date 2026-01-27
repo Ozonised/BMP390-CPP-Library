@@ -180,11 +180,11 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling os
 			break;
 
 		case bmp390::TempPressOversampling::x2:
-			osr |= bmp390::REG_OSR_OSR_P_1;
+			osr |= bmp390::REG_OSR_OSR_P_0;
 			break;
 
 		case bmp390::TempPressOversampling::x4:
-			osr |= bmp390::REG_OSR_OSR_P_2;
+			osr |= bmp390::REG_OSR_OSR_P_1;
 			break;
 
 		case bmp390::TempPressOversampling::x8:
@@ -237,11 +237,11 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
 			break;
 
 		case bmp390::TempPressOversampling::x2:
-			osr |= bmp390::REG_OSR_OSR_T_1;
+			osr |= bmp390::REG_OSR_OSR_T_0;
 			break;
 
 		case bmp390::TempPressOversampling::x4:
-			osr |= bmp390::REG_OSR_OSR_T_2;
+			osr |= bmp390::REG_OSR_OSR_T_1;
 			break;
 
 		case bmp390::TempPressOversampling::x8:
