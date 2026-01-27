@@ -146,7 +146,24 @@ namespace bmp390 {
 		ODR_0p0015Hz,
     };
 
+    enum class DrdySource : uint8_t {
+    	None = 0,
+    	Press,
+		Temp,
+		PressTemp
+    };
 
+    enum class IIRFilterCoefficient : uint8_t {
+    	coef0 = 0, // IIR Filter bypassed
+    	coef1,
+		coef3,
+		coef7,
+		coef15,
+		coef31,
+		coef63,
+		coef127
+
+    };
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */

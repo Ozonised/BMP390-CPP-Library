@@ -264,12 +264,41 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
 	return ret;
 }
 
+/**
+ * @brief Configure the output data rate (ODR).
+ *
+ * This function sets the output data rate for pressure and temperature
+ * measurements by writing to the ODR register. The selected data rate
+ * determines how frequently new measurement results are generated
+ * when the sensor is operating in Normal mode.
+ *
+ * @param odr Desired output data rate setting.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Output data rate configured successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register write failed.
+ *
+ * @note The ODR setting is only effective in Normal mode.
+ * @note In Forced mode, a single measurement is triggered regardless
+ *       of the configured output data rate.
+ */
 BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 {
 	uint8_t ODR = static_cast<uint8_t>(odr);
 	return write(hInterface, chipAddress, bmp390::REG_ODR, &ODR, 1);
 }
 
+/**
+ * @brief Read the BMP390 status register.
+ *
+ * @param status Reference to a variable where the status register
+ *               value will be stored.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Status register read successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read failed.
+ *
+ * @note The interpretation of individual status bits is defined
+ *       in the BMP390 datasheet.
+ */
 BMP390_RET_TYPE BMP390::GetStatus(uint8_t &status)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -277,6 +306,16 @@ BMP390_RET_TYPE BMP390::GetStatus(uint8_t &status)
 	return ret;
 }
 
+/**
+ * @brief Check whether the BMP390 is busy executing a command.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Device is ready (not busy).
+ * @retval BMP390_RET_TYPE_BUSY     Device is busy.
+ * @retval BMP390_RET_TYPE_FAILURE  Status register read failed.
+ *
+ * @note This function relies on the CMD_RDY bit in the STATUS register
+ *       as defined in the BMP390 datasheet.
+ */
 BMP390_RET_TYPE BMP390::IsBusy(void)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -286,8 +325,7 @@ BMP390_RET_TYPE BMP390::IsBusy(void)
 		if (status & bmp390::REG_STATUS_CMD_RDY)
 		{
 			ret = BMP390_RET_TYPE_SUCCESS;
-		}
-		else
+		} else
 		{
 			ret = BMP390_RET_TYPE_BUSY;
 		}
@@ -295,3 +333,72 @@ BMP390_RET_TYPE BMP390::IsBusy(void)
 	return ret;
 }
 
+BMP390_RET_TYPE BMP390::GetDrdySource(bmp390::DrdySource &src)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t status = 0;
+
+	ret = GetStatus(status);
+
+	if (ret == BMP390_RET_TYPE_SUCCESS)
+	{
+		if ((status & bmp390::REG_STATUS_DRDY_PRESS) && (status & bmp390::REG_STATUS_DRDY_TEMP))
+			src = bmp390::DrdySource::PressTemp;
+		else if (status & bmp390::REG_STATUS_DRDY_PRESS)
+			src = bmp390::DrdySource::Press;
+		else if (status & bmp390::REG_STATUS_DRDY_TEMP)
+			src = bmp390::DrdySource::Temp;
+		else
+			src = bmp390::DrdySource::None;
+	}
+	return ret;
+}
+
+BMP390_RET_TYPE BMP390::SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coef)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t config = 0;
+
+	if (read(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1) == BMP390_RET_TYPE_SUCCESS)
+	{
+		config &= ~(bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0);
+		switch (coef) {
+			case bmp390::IIRFilterCoefficient::coef0:
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef1:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_0;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef3:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_1;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef7:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef15:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_2;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef31:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_0;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef63:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1;
+				break;
+
+			case bmp390::IIRFilterCoefficient::coef127:
+				config |= bmp390::REG_CONFIG_IIR_FILTER_2 | bmp390::REG_CONFIG_IIR_FILTER_1 | bmp390::REG_CONFIG_IIR_FILTER_0;
+				break;
+			default:
+				break;
+		}
+
+		ret = write(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1);
+	}
+
+	return ret;
+}
