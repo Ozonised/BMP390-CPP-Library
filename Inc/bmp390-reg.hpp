@@ -167,6 +167,16 @@ namespace bmp390 {
 		coef127
     };
 
+    enum class InterruptSource : uint8_t {
+    	None = 0,
+    	TempPress,					// Temperature and Pressure data ready interrupt
+    	FifoFull,					// Fifo full interrupt
+		FifoWtm,					// Fifo watermark interrupt
+		TempPressFifoFull,			// Temperature and Pressure data ready and Fifo Full interrupt
+		TempPressFifoWtm,			// Temperature and Pressure data ready and Fifo Watermark interrupt
+		FifoFullFifoWtm,			// Fifo full and Fifo watermark interrupt
+		TempPressFifoFullFifoWtm	// Temperature, Pressure data ready, Fifo full and Fifo Watermark interrupt
+    };
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */

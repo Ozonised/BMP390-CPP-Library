@@ -100,8 +100,8 @@ BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
  * @brief Enable/Disable pressure measurement
  *
  * @param[in] n
- * 			- 1 : enable pressure measurement
- * 			- 0 : disable pressure measurement
+ * 			  - 1 : enable pressure measurement
+ * 			  - 0 : disable pressure measurement
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Success
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
@@ -127,8 +127,8 @@ BMP390_RET_TYPE BMP390::TogglePressureMeasurement(bool n)
  * @brief Enable/Disable temperature measurement
  *
  * @param[in] n
- * 			- 1 : enable temperature measurement
- * 			- 0 : disable temperature measurement
+ * 			  - 1 : enable temperature measurement
+ * 			  - 0 : disable temperature measurement
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Success
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
@@ -163,7 +163,7 @@ BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
  *
- * @note Refer to table 6 in section 3.4.1 of the datasheet
+ * @see Table 6 in section 3.4.1 of the datasheet
  */
 BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling osrp)
 {
@@ -194,7 +194,7 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling os
  * @retval BMP390_RET_TYPE_SUCCESS  Oversampling configuration updated successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
  *
- * @note Refer to table 6 & 7 in section 3.4.1 & 3.4.2 of the datasheet
+ * @see table 6 & 7 in section 3.4.1 & 3.4.2 of the datasheet
  */
 BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling osrt)
 {
@@ -228,6 +228,8 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
  * @note The ODR setting is only effective in Normal mode.
  * @note In Forced mode, a single measurement is triggered regardless
  *       of the configured output data rate.
+ *
+ * @see Table 45 in section 4.3.20 for odr settings
  */
 BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 {
@@ -239,7 +241,7 @@ BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
  * @brief Read the BMP390 status register.
  *
  * @param[out] status Reference to a variable where the status register
- *               value will be stored.
+ *             value will be stored.
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Status register read successfully.
  * @retval BMP390_RET_TYPE_FAILURE  Register read failed.
@@ -281,6 +283,29 @@ BMP390_RET_TYPE BMP390::IsBusy(void)
 	return ret;
 }
 
+/**
+ * @brief Get the data-ready (DRDY) source.
+ *
+ * This function reads the BMP390 status register and determines which
+ * measurement data is ready based on the DRDY status bits.
+ *
+ * The returned source indicates whether:
+ * - Pressure data is ready
+ * - Temperature data is ready
+ * - Both pressure and temperature data are ready
+ * - No new data is available
+ *
+ * @param[out] src DrdySource object, contains one of DrdySource value
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  Status register read successfully and
+ *                                  data-ready source updated.
+ * @retval BMP390_RET_TYPE_FAILURE  Failed to read status register.
+ *
+ * @note If both pressure and temperature DRDY bits are set, the source
+ *       is reported as @ref bmp390::DrdySource::PressTemp.
+ *
+ * @see bmp390::DrdySource
+ */
 BMP390_RET_TYPE BMP390::GetDrdySource(bmp390::DrdySource &src)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -302,6 +327,25 @@ BMP390_RET_TYPE BMP390::GetDrdySource(bmp390::DrdySource &src)
 	return ret;
 }
 
+/**
+ * @brief Configure the IIR filter coefficient.
+ *
+ * This function sets the Infinite Impulse Response (IIR) filter coefficient
+ * used by the BMP390 to smooth pressure and temperature measurements.
+ *
+ * The IIR filter reduces measurement noise at the cost of increased
+ * response time. Higher filter coefficients provide stronger filtering
+ * and greater latency.
+ *
+ * @param[in] coef IIR filter coefficient to be applied.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  IIR filter coefficient configured
+ *                                  successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Failed to read or write the CONFIG register.
+ *
+ * @see bmp390::IIRFilterCoefficient
+ * @see Figure 6 in section 3.4.3 for step response and Table 10 in section 3.5 for recommended filter values.
+ */
 BMP390_RET_TYPE BMP390::SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coef)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
@@ -314,6 +358,122 @@ BMP390_RET_TYPE BMP390::SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coe
 		config |= (static_cast<uint8_t>(coef) << bmp390::REG_CONFIG_IIR_FILTER_POS);
 
 		ret = write(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1);
+	}
+	return ret;
+}
+
+/**
+ * @brief Configure the electrical behavior of the BMP390 INT pin.
+ *
+ * This function configures the interrupt pin output type, active level,
+ * and latching behavior by updating the INT_CTRL register.
+ *
+ * @param od[in]    Interrupt pin output driver type.
+ *               	- true  : Open-drain output
+ *               	- false : Push-pull output
+ *
+ * @param level[in] Interrupt pin active level.
+ *               	- true  : Active-high
+ *               	- false : Active-low
+ *
+ * @param latch[in] Interrupt pin latching behavior.
+ *               	- true  : Interrupt is latched until status is cleared
+ *               	- false : Interrupt is pulse-based (non-latched)
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  INT_CTRL register updated successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read or write failed.
+ *
+ * @note When open-drain mode is enabled, an external pull-up resistor
+ *       is required on the INT pin.
+ *
+ * @note Latching affects both the INT pin and the INT_STATUS register.
+ */
+BMP390_RET_TYPE BMP390::ConfigInterruptPin(bool od, bool level, bool latch)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t IntCtrl = 0;
+
+	if (read(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
+	{
+		IntCtrl = od ? (IntCtrl | bmp390::REG_INT_CTRL_INT_OD) : (IntCtrl & ~(bmp390::REG_INT_CTRL_INT_OD));
+		IntCtrl = level ? (IntCtrl | bmp390::REG_INT_CTRL_INT_LEVEL) : (IntCtrl & ~(bmp390::REG_INT_CTRL_INT_LEVEL));
+		IntCtrl = latch ? (IntCtrl | bmp390::REG_INT_CTRL_INT_LATCH) : (IntCtrl & ~(bmp390::REG_INT_CTRL_INT_LATCH));
+
+		ret = write(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1);
+	}
+	return ret;
+}
+
+/**
+ * @brief Enable or disable interrupt sources for the INT pin.
+ *
+ * This function selects which internal events can trigger an interrupt
+ * on the INT pin by enabling or disabling corresponding bits in the
+ * INT_CTRL register.
+ *
+ *
+ * @param TempPress[in]     Enable temperature/pressure data-ready interrupt.
+ *                      	- true  : Data-ready interrupt enabled
+ *                      	- false : Data-ready interrupt disabled
+ *
+ * @param FifoFull[in]      Enable FIFO full interrupt.
+ *                      	- true  : FIFO full interrupt enabled
+ *                      	- false : FIFO full interrupt disabled
+ *
+ * @param FifoWaterMark[in] Enable FIFO watermark interrupt.
+ *                      	- true  : FIFO watermark interrupt enabled
+ *                      	- false : FIFO watermark interrupt disabled
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  INT_CTRL register updated successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Register read or write failed.
+ *
+ * @note Interrupt sources are reflected in both the INT pin and the
+ *       INT_STATUS register.
+ */
+BMP390_RET_TYPE BMP390::SetInterruptSource(bool TempPress, bool FifoFull, bool FifoWaterMark)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t IntCtrl = 0;
+
+	if (read(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
+	{
+		IntCtrl = TempPress ? (IntCtrl | bmp390::REG_INT_CTRL_DRDY_EN) : (IntCtrl & ~(bmp390::REG_INT_CTRL_DRDY_EN));
+		IntCtrl = FifoFull ? (IntCtrl | bmp390::REG_INT_CTRL_FFULL_EN) : (IntCtrl & ~(bmp390::REG_INT_CTRL_FFULL_EN));
+		IntCtrl = FifoWaterMark ? (IntCtrl | bmp390::REG_INT_CTRL_FWTM_EN) : (IntCtrl & ~(bmp390::REG_INT_CTRL_FWTM_EN));
+
+		ret = write(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1);
+	}
+	return ret;
+}
+
+/**
+ * @brief Read and decode the active interrupt source(s).
+ *
+ * This function reads the INT_STATUS register of the BMP390 and extracts
+ * the interrupt source flags related to:
+ * - Temperature / pressure data ready
+ * - FIFO full
+ * - FIFO watermark reached
+ *
+ * @param[out] src InterruptSource object, contains one of InterruptSource value
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  INT_STATUS register read successfully
+ *                                  and interrupt source updated.
+ * @retval BMP390_RET_TYPE_FAILURE  Failed to read INT_STATUS register.
+ *
+ * @see bmp390::InterruptSource
+ */
+BMP390_RET_TYPE BMP390::GetInterruptSource(bmp390::InterruptSource &src)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t IntStatus = 0;
+
+	ret = read(hInterface, chipAddress, bmp390::REG_INT_STATUS, &IntStatus, 1);
+	if (ret == BMP390_RET_TYPE_SUCCESS)
+	{
+		IntStatus &= (bmp390::REG_INT_STATUS_DRDY | bmp390::REG_INT_STATUS_FFULL_INT | bmp390::REG_INT_STATUS_FWM_INT);
+
+		src = static_cast<bmp390::InterruptSource>(IntStatus);
 	}
 	return ret;
 }

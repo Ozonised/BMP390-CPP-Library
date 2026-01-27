@@ -39,6 +39,9 @@ class BMP390 {
 		BMP390_RET_TYPE SetTemperatureOversampling(bmp390::TempPressOversampling osrt);
 		BMP390_RET_TYPE SetOutputDataRate(bmp390::TempPressODR odr);
 		BMP390_RET_TYPE SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coef);
+		BMP390_RET_TYPE ConfigInterruptPin(bool od, bool level, bool latch);
+		BMP390_RET_TYPE SetInterruptSource(bool TempPress, bool FifoFull, bool FifoWaterMark);
+		BMP390_RET_TYPE GetInterruptSource(bmp390::InterruptSource &src);
 		BMP390_RET_TYPE TogglePressureMeasurement(bool n);
 		BMP390_RET_TYPE ToggleTemperatureMeasurement(bool n);
 		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
