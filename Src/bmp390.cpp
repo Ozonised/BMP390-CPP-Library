@@ -477,3 +477,226 @@ BMP390_RET_TYPE BMP390::GetInterruptSource(bmp390::InterruptSource &src)
 	}
 	return ret;
 }
+
+/**
+ * @brief Read and decode BMP390 factory calibration parameters from NVM.
+ *
+ * This function reads the non-volatile memory (NVM) trimming parameters
+ * stored in the BMP390 during production and converts them into
+ * floating-point compensation coefficients.
+ *
+ * The decoded coefficients are stored internally and later used by
+ * the temperature and pressure compensation algorithms.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS  NVM parameters were read and decoded successfully.
+ * @retval BMP390_RET_TYPE_FAILURE  Communication with the device failed.
+ *
+ * @note This function must be called once after power up and before
+ *       performing any temperature or pressure compensation.
+ *
+ * @see section 3.11.1 for NVM list and 8.4 for calibration
+ */
+BMP390_RET_TYPE BMP390::ReadNVM(void)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t NvmPar[20];
+
+	ret = read(hInterface, chipAddress, bmp390::REG_NVM_PAR_START, NvmPar, 20);
+
+	if (ret == BMP390_RET_TYPE_SUCCESS)
+	{
+		uint16_t u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[1]) << 8 | NvmPar[0]);
+		ParT1 = static_cast<float>(u16) * 256.0f;
+
+		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[3]) << 8 | NvmPar[2]);
+		ParT2 = static_cast<float>(u16) * 9.31322574615e-10f;
+
+		ParT3 = static_cast<float>(static_cast<int8_t>(NvmPar[4])) * 3.5527136788e-15f;
+
+		int16_t s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[6]) << 8 | NvmPar[5]);
+		ParP1 = static_cast<float>(s16 - 16384) * 9.53674316406e-07f;
+
+		s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[8]) << 8 | NvmPar[7]);
+		ParP2 = static_cast<float>(s16 - 16384) * 1.86264514923e-09f;
+
+		ParP3 = static_cast<float>(static_cast<int8_t>(NvmPar[9])) * 2.32830643654e-10f;
+		ParP4 = static_cast<float>(static_cast<int8_t>(NvmPar[10])) * 7.27595761418e-12f;
+
+		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[12]) << 8 | NvmPar[11]);
+		ParP5 = static_cast<float>(u16) * 8.0f;
+
+		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[14]) << 8 | NvmPar[13]);
+		ParP6 = static_cast<float>(u16) * 0.015625f;
+
+		ParP7 = static_cast<float>(static_cast<int8_t>(NvmPar[15])) * 0.00390625f;
+		ParP8 = static_cast<float>(static_cast<int8_t>(NvmPar[16])) * 3.0517578125e-05f;
+
+		s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[18]) << 8 | NvmPar[17]);
+		ParP9 = static_cast<float>(s16) * 3.5527136788e-15f;
+
+		ParP10 = static_cast<float>(static_cast<int8_t>(NvmPar[19])) * 3.5527136788e-15f;
+		ParP11 = static_cast<float>(static_cast<int8_t>(NvmPar[20])) * 2.71050543121e-20f;
+	}
+	return ret;
+}
+
+/**
+ * @brief Compensate raw (uncompensated) temperature reading.
+ *
+ * This function converts the raw 24-bit uncompensated temperature value
+ * read from the BMP390 sensor into a compensated temperature value using
+ * calibration parameters stored in NVM.
+ *
+ * The implementation follows the temperature compensation algorithm
+ * described in the BMP390 datasheet (Section 8.5).
+ *
+ * @param[in] UncompTemp 24-bit uncompensated temperature value from the sensor.
+ *
+ * @return Linearized temperature value (TempLin) in degrees Celsius.
+ *
+ * @note The calibration parameters ParT1, ParT2, and ParT3 must be
+ *       successfully read from the sensor using ReadNVM() before calling this function.
+ *
+ * @see section 8.5 in the datasheet
+ */
+float BMP390::CompensateTemperature(uint32_t UncompTemp)
+{
+	float PartialData1 = static_cast<float>(UncompTemp) - ParT1;
+	float PartialData2 = PartialData1 * ParT2;
+	/* Update the compensated temperature in structure since this is
+	* needed for pressure calculation */
+	float TempLin = PartialData2 + (PartialData1 * PartialData1) * ParT3;
+	/* Returns compensated temperature */
+	return TempLin;
+}
+
+/**
+ * @brief Read and return the compensated temperature from the BMP390 sensor.
+ *
+ * This function reads the raw temperature data registers from the BMP390,
+ * and applies temperature compensation using calibration data.
+ *
+ * @param[out] Temperature Reference to a float variable where the
+ *                         compensated temperature (in °C) will be stored.
+ *
+ * @retval BMP390_RET_TYPE_SUCCESS on successful read and compensation,
+ * @retval BMP390_RET_TYPE_FAILURE otherwise.
+ *
+ * @note Calibration parameters must be initialized by calling ReadNVM()
+ *       before using this function.
+ *
+ * @note Use GetTemperatureAndPressure(float &Temperature, float &Pressure), if
+ * 		 pressure measurement is enabled.
+ */
+BMP390_RET_TYPE BMP390::GetTemperature(float &Temperature)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+	uint8_t RawData[3];
+	ret = read(hInterface, chipAddress, bmp390::REG_DATA_3, RawData, 3);
+
+	if (ret == BMP390_RET_TYPE_SUCCESS)
+	{
+		uint32_t UncompTemp = static_cast<uint32_t>(RawData[2]) << 16 | static_cast<uint32_t>(RawData[1]) << 8 | static_cast<uint32_t>(RawData[0]);
+
+		Temperature = CompensateTemperature(UncompTemp);
+	}
+	return ret;
+}
+
+/**
+ * @brief Compensate raw (uncompensated) pressure reading.
+ *
+ * This function converts the raw 24-bit uncompensated pressure value
+ * read from the BMP390 sensor into a compensated pressure value using
+ * calibration parameters stored in NVM.
+ *
+ * The pressure compensation algorithm depends on the linearized
+ * temperature value (TempLin) and follows the procedure described
+ * in the BMP390 datasheet (Section 8.6).
+ *
+ * @param[in] UncompPress 24-bit uncompensated pressure value from the sensor.
+ * @param[in] TempLin    Linearized temperature value obtained from
+ *                       CompensateTemperature().
+ *
+ * @return Compensated pressure value in Pascals (Pa).
+ *
+ * @note Calibration parameters ParP1 through ParP11 must be successfully
+ *       read from the sensor NVM using ReadNVM() before calling this function.
+ *
+ * @note The TempLin parameter must correspond to the same measurement
+ *       cycle as the pressure reading for accurate compensation.
+ *
+ * @see section 8.6 in the datasheet
+ */
+float BMP390::CompensatePressure(uint32_t UncompPress, float TempLin)
+{
+	/* Variable to store the compensated pressure */
+	float CompPress;
+	/* Temporary variables used for compensation */
+	float PartialData1;
+	float PartialData2;
+	float PartialData3;
+	float PartialData4;
+	float PartialOut1;
+	float PartialOut2;
+	/* Calibration data */
+	PartialData1 = ParP6 * TempLin;
+	PartialData2 = ParP7 * (TempLin * TempLin);
+	PartialData3 = ParP8 * (TempLin * TempLin * TempLin);
+	PartialOut1 = ParP5 + PartialData1 + PartialData2 + PartialData3;
+	PartialData1 = ParP2 * TempLin;
+	PartialData2 = ParP3 * (TempLin * TempLin);
+	PartialData3 = ParP4 * (TempLin * TempLin * TempLin);
+	PartialOut2 = static_cast<float>(UncompPress) * (ParP1 + PartialData1 + PartialData2 + PartialData3);
+	PartialData1 = static_cast<float>(UncompPress) * static_cast<float>(UncompPress);
+	PartialData2 = ParP9 + ParP10 * TempLin;
+	PartialData3 = PartialData1 * PartialData2;
+	PartialData4 = PartialData3 + (static_cast<float>(UncompPress) * static_cast<float>(UncompPress) * static_cast<float>(UncompPress)) * ParP11;
+	CompPress = PartialOut1 + PartialOut2 + PartialData4;
+
+	return CompPress;
+}
+
+/**
+ * @brief Read and return compensated temperature and pressure from the BMP390.
+ *
+ * This function reads both raw pressure and temperature data from the
+ * BMP390 data registers in a single burst read, reconstructs the
+ * 24-bit uncompensated values, and applies compensation algorithms
+ * using calibration data stored in NVM.
+ *
+ * Temperature compensation is performed first to obtain the linearized
+ * temperature value (TempLin), which is then used for pressure
+ * compensation as required by the BMP390 compensation model.
+ *
+ * @param[out] Temperature Reference to a float variable where the
+ *                         compensated temperature (in °C) will be stored.
+ * @param[out] Pressure    Reference to a float variable where the
+ *                         compensated pressure (in Pa) will be stored.
+ *
+ * @return BMP390_RET_TYPE_SUCCESS on successful read and compensation,
+ *         BMP390_RET_TYPE_FAILURE otherwise.
+ *
+ * @note Calibration parameters must be initialized by calling ReadNVM()
+ *       before using this function.
+ *
+ * @note This function ensures temperature and pressure values originate
+ *       from the same measurement cycle, improving consistency.
+ */
+BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(float &Temperature, float &Pressure)
+{
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+
+	uint8_t RawData[6];
+	ret = read(hInterface, chipAddress, bmp390::REG_DATA_0, RawData, 6);
+
+	if (ret == BMP390_RET_TYPE_SUCCESS)
+	{
+		uint32_t UncompPress = static_cast<uint32_t>(RawData[2]) << 16 | static_cast<uint32_t>(RawData[1]) << 8 | static_cast<uint32_t>(RawData[0]);
+		uint32_t UncompTemp = static_cast<uint32_t>(RawData[5]) << 16 | static_cast<uint32_t>(RawData[4]) << 8 | static_cast<uint32_t>(RawData[3]);
+
+		Temperature = CompensateTemperature(UncompTemp);
+		Pressure = CompensatePressure(UncompPress, Temperature);
+	}
+	return ret;
+}

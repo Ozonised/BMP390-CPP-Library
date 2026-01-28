@@ -110,6 +110,9 @@ namespace bmp390 {
     constexpr uint8_t REG_CONFIG_IIR_FILTER_1 = (1 << 2);
     constexpr uint8_t REG_CONFIG_IIR_FILTER_2 = (1 << 3);
 
+    constexpr uint8_t REG_NVM_PAR_START = 0x31;
+    constexpr uint8_t REG_NVM_PAR_END = 0x45;
+
     constexpr uint8_t CHIP_ID = 0x60;
     constexpr uint8_t REV_ID = 0x01;
 
@@ -177,6 +180,7 @@ namespace bmp390 {
 		FifoFullFifoWtm,			// Fifo full and Fifo watermark interrupt
 		TempPressFifoFullFifoWtm	// Temperature, Pressure data ready, Fifo full and Fifo Watermark interrupt
     };
+
 }  // namespace bmp390
 
 #endif /* BMP390_REG_HPP_ */
