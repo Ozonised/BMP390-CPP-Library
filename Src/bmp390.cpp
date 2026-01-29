@@ -97,53 +97,35 @@ BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
 }
 
 /**
- * @brief Enable/Disable pressure measurement
+ * @brief Enable/Disable temeprature and pressure measurement
  *
- * @param[in] n
+ * @param[in] TempEn
+ * 			  - 1 : enable temperature measurement
+ * 			  - 0 : disable temperature measurement
+ *
+ * @param[in] PressEn
  * 			  - 1 : enable pressure measurement
  * 			  - 0 : disable pressure measurement
  *
  * @retval BMP390_RET_TYPE_SUCCESS  Success
  * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
  */
-BMP390_RET_TYPE BMP390::TogglePressureMeasurement(bool n)
+BMP390_RET_TYPE BMP390::ToggleTemperatureAndPressureMeasurement(bool TempEn, bool PressEn)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t pwrCtrl = 0;
 
 	if (read(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
-		if (n == true)
-			pwrCtrl |= (bmp390::REG_PWR_CTRL_PRESS_EN);
-		else
-			pwrCtrl &= ~(bmp390::REG_PWR_CTRL_PRESS_EN);
-
-		ret = write(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1);
-	}
-	return ret;
-}
-
-/**
- * @brief Enable/Disable temperature measurement
- *
- * @param[in] n
- * 			  - 1 : enable temperature measurement
- * 			  - 0 : disable temperature measurement
- *
- * @retval BMP390_RET_TYPE_SUCCESS  Success
- * @retval BMP390_RET_TYPE_FAILURE  Register read/write failed.
- */
-BMP390_RET_TYPE BMP390::ToggleTemperatureMeasurement(bool n)
-{
-	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
-	uint8_t pwrCtrl = 0;
-
-	if (read(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
-	{
-		if (n == true)
+		if (TempEn == true)
 			pwrCtrl |= (bmp390::REG_PWR_CTRL_TEMP_EN);
 		else
 			pwrCtrl &= ~(bmp390::REG_PWR_CTRL_TEMP_EN);
+
+		if (PressEn == true)
+			pwrCtrl |= (bmp390::REG_PWR_CTRL_PRESS_EN);
+		else
+			pwrCtrl &= ~(bmp390::REG_PWR_CTRL_PRESS_EN);
 
 		ret = write(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1);
 	}
@@ -499,9 +481,9 @@ BMP390_RET_TYPE BMP390::GetInterruptSource(bmp390::InterruptSource &src)
 BMP390_RET_TYPE BMP390::ReadNVM(void)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
-	uint8_t NvmPar[20];
+	uint8_t NvmPar[21];
 
-	ret = read(hInterface, chipAddress, bmp390::REG_NVM_PAR_START, NvmPar, 20);
+	ret = read(hInterface, chipAddress, bmp390::REG_NVM_PAR_START, NvmPar, 21);
 
 	if (ret == BMP390_RET_TYPE_SUCCESS)
 	{

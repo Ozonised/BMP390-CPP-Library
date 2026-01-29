@@ -76,8 +76,7 @@ class BMP390 {
 		BMP390_RET_TYPE ConfigInterruptPin(bool od, bool level, bool latch);
 		BMP390_RET_TYPE SetInterruptSource(bool TempPress, bool FifoFull, bool FifoWaterMark);
 		BMP390_RET_TYPE GetInterruptSource(bmp390::InterruptSource &src);
-		BMP390_RET_TYPE TogglePressureMeasurement(bool n);
-		BMP390_RET_TYPE ToggleTemperatureMeasurement(bool n);
+		BMP390_RET_TYPE ToggleTemperatureAndPressureMeasurement(bool TempEn, bool PressEn);
 		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
 		BMP390_RET_TYPE GetTemperature(float &Temperature);
 		BMP390_RET_TYPE GetTemperatureAndPressure(float &Temperature, float &Pressure);
