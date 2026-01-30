@@ -80,5 +80,6 @@ class BMP390 {
 		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
 		BMP390_RET_TYPE GetTemperature(double &Temperature);
 		BMP390_RET_TYPE GetTemperatureAndPressure(double &Temperature, double &Pressure);
+		float GetAltitude(double &Pressure);
 };
 #endif /* BMP390_HPP_ */

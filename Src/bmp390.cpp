@@ -6,6 +6,7 @@
  */
 
 #include "bmp390.hpp"
+#include <math.h>
 
 /**
  * @brief Determine I2C address.
@@ -681,4 +682,9 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
 		Pressure = CompensatePressure(UncompPress, Temperature);
 	}
 	return ret;
+}
+
+float BMP390::GetAltitude(double &Pressure)
+{
+	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101325.0f), 0.19026f));
 }
