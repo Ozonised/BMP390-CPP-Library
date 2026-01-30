@@ -24,25 +24,25 @@ class BMP390 {
 
 		uint8_t chipAddress;
 
-		float ParT1;
-		float ParT2;
-		float ParT3;
+		double ParT1;
+		double ParT2;
+		double ParT3;
 
-		float ParP1;
-		float ParP2;
-		float ParP3;
-		float ParP4;
-		float ParP5;
-		float ParP6;
-		float ParP7;
-		float ParP8;
-		float ParP9;
-		float ParP10;
-		float ParP11;
+		double ParP1;
+		double ParP2;
+		double ParP3;
+		double ParP4;
+		double ParP5;
+		double ParP6;
+		double ParP7;
+		double ParP8;
+		double ParP9;
+		double ParP10;
+		double ParP11;
 
 		BMP390_RET_TYPE GetStatus(uint8_t &status);
-		float CompensateTemperature(uint32_t UncompTemp);
-		float CompensatePressure(uint32_t UncompPress, float TempLin);
+		double CompensateTemperature(uint32_t UncompTemp);
+		double CompensatePressure(uint32_t UncompPress, double TempLin);
 	public:
 		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write, BMP390_DelayMsFuncPtr delay) :
 			hInterface(hInterface), read(read), write(write), delayMs(delay)
@@ -78,7 +78,7 @@ class BMP390 {
 		BMP390_RET_TYPE GetInterruptSource(bmp390::InterruptSource &src);
 		BMP390_RET_TYPE ToggleTemperatureAndPressureMeasurement(bool TempEn, bool PressEn);
 		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
-		BMP390_RET_TYPE GetTemperature(float &Temperature);
-		BMP390_RET_TYPE GetTemperatureAndPressure(float &Temperature, float &Pressure);
+		BMP390_RET_TYPE GetTemperature(double &Temperature);
+		BMP390_RET_TYPE GetTemperatureAndPressure(double &Temperature, double &Pressure);
 };
 #endif /* BMP390_HPP_ */

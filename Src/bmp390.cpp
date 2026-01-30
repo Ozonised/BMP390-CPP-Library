@@ -488,36 +488,36 @@ BMP390_RET_TYPE BMP390::ReadNVM(void)
 	if (ret == BMP390_RET_TYPE_SUCCESS)
 	{
 		uint16_t u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[1]) << 8 | NvmPar[0]);
-		ParT1 = static_cast<float>(u16) * 256.0f;
+		ParT1 = static_cast<double>(u16) / 0.00390625f;
 
 		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[3]) << 8 | NvmPar[2]);
-		ParT2 = static_cast<float>(u16) * 9.31322574615e-10f;
+		ParT2 = static_cast<double>(u16) / 1073741824.0f;
 
-		ParT3 = static_cast<float>(static_cast<int8_t>(NvmPar[4])) * 3.5527136788e-15f;
+		ParT3 = static_cast<double>(static_cast<int8_t>(NvmPar[4])) / 281474976710656.0f;
 
 		int16_t s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[6]) << 8 | NvmPar[5]);
-		ParP1 = static_cast<float>(s16 - 16384) * 9.53674316406e-07f;
+		ParP1 = static_cast<double>(s16 - 16384) / 1048576.0f;
 
 		s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[8]) << 8 | NvmPar[7]);
-		ParP2 = static_cast<float>(s16 - 16384) * 1.86264514923e-09f;
+		ParP2 = static_cast<double>(s16 - 16384) / 536870912.0f;
 
-		ParP3 = static_cast<float>(static_cast<int8_t>(NvmPar[9])) * 2.32830643654e-10f;
-		ParP4 = static_cast<float>(static_cast<int8_t>(NvmPar[10])) * 7.27595761418e-12f;
+		ParP3 = static_cast<double>(static_cast<int8_t>(NvmPar[9])) / 4294967296.0f;
+		ParP4 = static_cast<double>(static_cast<int8_t>(NvmPar[10])) / 137438953472.0f;
 
 		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[12]) << 8 | NvmPar[11]);
-		ParP5 = static_cast<float>(u16) * 8.0f;
+		ParP5 = static_cast<double>(u16) / 0.125f;
 
 		u16 = static_cast<uint16_t>(static_cast<uint16_t>(NvmPar[14]) << 8 | NvmPar[13]);
-		ParP6 = static_cast<float>(u16) * 0.015625f;
+		ParP6 = static_cast<double>(u16) / 64.0f;
 
-		ParP7 = static_cast<float>(static_cast<int8_t>(NvmPar[15])) * 0.00390625f;
-		ParP8 = static_cast<float>(static_cast<int8_t>(NvmPar[16])) * 3.0517578125e-05f;
+		ParP7 = static_cast<double>(static_cast<int8_t>(NvmPar[15])) / 256.0f;
+		ParP8 = static_cast<double>(static_cast<int8_t>(NvmPar[16])) / 32768.0f;
 
 		s16 = static_cast<int16_t>(static_cast<uint16_t>(NvmPar[18]) << 8 | NvmPar[17]);
-		ParP9 = static_cast<float>(s16) * 3.5527136788e-15f;
+		ParP9 = static_cast<double>(s16) / 281474976710656.0f;
 
-		ParP10 = static_cast<float>(static_cast<int8_t>(NvmPar[19])) * 3.5527136788e-15f;
-		ParP11 = static_cast<float>(static_cast<int8_t>(NvmPar[20])) * 2.71050543121e-20f;
+		ParP10 = static_cast<double>(static_cast<int8_t>(NvmPar[19])) / 281474976710656.0f;
+		ParP11 = static_cast<double>(static_cast<int8_t>(NvmPar[20])) / 36893488147419103232.0f;
 	}
 	return ret;
 }
@@ -541,13 +541,13 @@ BMP390_RET_TYPE BMP390::ReadNVM(void)
  *
  * @see section 8.5 in the datasheet
  */
-float BMP390::CompensateTemperature(uint32_t UncompTemp)
+double BMP390::CompensateTemperature(uint32_t UncompTemp)
 {
-	float PartialData1 = static_cast<float>(UncompTemp) - ParT1;
-	float PartialData2 = PartialData1 * ParT2;
+	double PartialData1 = static_cast<double>(UncompTemp) - ParT1;
+	double PartialData2 = PartialData1 * ParT2;
 	/* Update the compensated temperature in structure since this is
 	* needed for pressure calculation */
-	float TempLin = PartialData2 + (PartialData1 * PartialData1) * ParT3;
+	double TempLin = PartialData2 + (PartialData1 * PartialData1) * ParT3;
 	/* Returns compensated temperature */
 	return TempLin;
 }
@@ -570,7 +570,7 @@ float BMP390::CompensateTemperature(uint32_t UncompTemp)
  * @note Use GetTemperatureAndPressure(float &Temperature, float &Pressure), if
  * 		 pressure measurement is enabled.
  */
-BMP390_RET_TYPE BMP390::GetTemperature(float &Temperature)
+BMP390_RET_TYPE BMP390::GetTemperature(double &Temperature)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t RawData[3];
@@ -610,17 +610,17 @@ BMP390_RET_TYPE BMP390::GetTemperature(float &Temperature)
  *
  * @see section 8.6 in the datasheet
  */
-float BMP390::CompensatePressure(uint32_t UncompPress, float TempLin)
+double BMP390::CompensatePressure(uint32_t UncompPress, double TempLin)
 {
 	/* Variable to store the compensated pressure */
-	float CompPress;
+	double CompPress;
 	/* Temporary variables used for compensation */
-	float PartialData1;
-	float PartialData2;
-	float PartialData3;
-	float PartialData4;
-	float PartialOut1;
-	float PartialOut2;
+	double PartialData1;
+	double PartialData2;
+	double PartialData3;
+	double PartialData4;
+	double PartialOut1;
+	double PartialOut2;
 	/* Calibration data */
 	PartialData1 = ParP6 * TempLin;
 	PartialData2 = ParP7 * (TempLin * TempLin);
@@ -629,11 +629,11 @@ float BMP390::CompensatePressure(uint32_t UncompPress, float TempLin)
 	PartialData1 = ParP2 * TempLin;
 	PartialData2 = ParP3 * (TempLin * TempLin);
 	PartialData3 = ParP4 * (TempLin * TempLin * TempLin);
-	PartialOut2 = static_cast<float>(UncompPress) * (ParP1 + PartialData1 + PartialData2 + PartialData3);
-	PartialData1 = static_cast<float>(UncompPress) * static_cast<float>(UncompPress);
+	PartialOut2 = static_cast<double>(UncompPress) * (ParP1 + PartialData1 + PartialData2 + PartialData3);
+	PartialData1 = static_cast<double>(UncompPress) * static_cast<double>(UncompPress);
 	PartialData2 = ParP9 + ParP10 * TempLin;
 	PartialData3 = PartialData1 * PartialData2;
-	PartialData4 = PartialData3 + (static_cast<float>(UncompPress) * static_cast<float>(UncompPress) * static_cast<float>(UncompPress)) * ParP11;
+	PartialData4 = PartialData3 + (static_cast<double>(UncompPress) * static_cast<double>(UncompPress) * static_cast<double>(UncompPress)) * ParP11;
 	CompPress = PartialOut1 + PartialOut2 + PartialData4;
 
 	return CompPress;
@@ -665,7 +665,7 @@ float BMP390::CompensatePressure(uint32_t UncompPress, float TempLin)
  * @note This function ensures temperature and pressure values originate
  *       from the same measurement cycle, improving consistency.
  */
-BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(float &Temperature, float &Pressure)
+BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &Pressure)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 
