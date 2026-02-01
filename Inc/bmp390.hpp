@@ -13,14 +13,12 @@
 
 typedef BMP390_RET_TYPE (*BMP390_ReadFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
 typedef BMP390_RET_TYPE (*BMP390_WriteFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
-typedef BMP390_RET_TYPE (*BMP390_DelayMsFuncPtr)(void *hInterface, uint32_t delayMs);
 
 class BMP390 {
 	private:
 		void *hInterface;
 		BMP390_ReadFuncPtr read;
 		BMP390_WriteFuncPtr write;
-		BMP390_DelayMsFuncPtr delayMs;
 
 		uint8_t chipAddress;
 
@@ -44,8 +42,8 @@ class BMP390 {
 		double CompensateTemperature(uint32_t UncompTemp);
 		double CompensatePressure(uint32_t UncompPress, double TempLin);
 	public:
-		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write, BMP390_DelayMsFuncPtr delay) :
-			hInterface(hInterface), read(read), write(write), delayMs(delay)
+		BMP390(void *hInterface, BMP390_ReadFuncPtr read, BMP390_WriteFuncPtr write) :
+			hInterface(hInterface), read(read), write(write)
 		{
 			chipAddress = 0;
 			ParT1 = 0;
