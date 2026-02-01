@@ -711,5 +711,5 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
  */
 float BMP390::GetAltitude(double &Pressure)
 {
-	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101325.0f), 0.19026f));
+	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101323.5f), 0.19026f));
 }
