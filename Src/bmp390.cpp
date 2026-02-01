@@ -684,6 +684,31 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
 	return ret;
 }
 
+/**
+ * @brief Calculate altitude from atmospheric pressure.
+ *
+ * This function computes the altitude above mean sea level (MSL)
+ * using the barometric formula, based on the provided atmospheric
+ * pressure.
+ *
+ * The calculation assumes the International Standard Atmosphere (ISA)
+ * model with a reference sea-level pressure of 101325 Pa.
+ *
+ * @param[in] Pressure Atmospheric pressure in Pascals (Pa).
+ *
+ * @return Altitude in meters above mean sea level (m).
+ *
+ * @note The computed altitude is sensitive to the reference sea-level
+ *       pressure. For improved accuracy, especially under changing
+ *       weather conditions, the sea-level pressure should be adjusted
+ *       to local conditions.
+ *
+ * @warning This altitude estimation is based on a standard atmosphere
+ *          model and may differ from true geometric altitude.
+ *
+ * @see BMP390::GetPressure
+ * @see https://www.mide.com/air-pressure-at-altitude-calculator
+ */
 float BMP390::GetAltitude(double &Pressure)
 {
 	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101325.0f), 0.19026f));
