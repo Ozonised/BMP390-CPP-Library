@@ -76,6 +76,8 @@ BMP390_RET_TYPE BMP390_I2CWrite(void *hInterface, uint8_t chipAddr, uint8_t reg,
   .
 BMP390 baro(static_cast<void*>(&hi2c2), BMP390_I2CRead, BMP390_I2CWrite);
 
+double Temperature, Pressure;
+
 int main(void)
 {	
 	  .
