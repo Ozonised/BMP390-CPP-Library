@@ -77,16 +77,16 @@ BMP390_RET_TYPE BMP390_I2CWrite(void *hInterface, uint8_t chipAddr, uint8_t reg,
 BMP390 baro(static_cast<void*>(&hi2c2), BMP390_I2CRead, BMP390_I2CWrite);
 
 int main(void)
-{
-  .
-  .
-  .
-  // MCU initisation
-  .
-  .
-  .
+{	
+	  .
+	  .
+	  .
+    // MCU initisation
+	  .
+	  .
+	  .
 	baro.Init(1, 0);
-  delayMilliSecond(20);
+  	HAL_Delay(20);
 
 	ret = baro.IsPresent();
 
@@ -96,63 +96,97 @@ int main(void)
 	ret = baro.ReadNVM();
 	if (ret == HAL_OK)
 	{
+		// set normal mode
 		ret = baro.SetPowerMode(bmp390::PowerMode::Normal);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// set pressure oversampling to x8
 		ret = baro.SetPressureOversampling(bmp390::TempPressOversampling::x8);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// set temperature oversampling to x8
 		ret = baro.SetTemperatureOversampling(bmp390::TempPressOversampling::x1);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// set output data rate to 50Hz
 		ret = baro.SetOutputDataRate(bmp390::TempPressODR::ODR_50Hz);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// set IIR filter coefficient 3/(binary value = 2)
 		ret = baro.SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient::coef3);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// enable temperature and pressure data ready interrupt
 		ret = baro.SetInterruptSource(1, 0, 0);
 
+		// wait if device is busy or the read/write operation failed
 		do
 		{
 			ret = baro.IsBusy();
 		} while (ret == HAL_BUSY || ret == HAL_ERROR);
 
+		// enable temperature and pressure measurement
 		ret = baro.ToggleTemperatureAndPressureMeasurement(1, 1);
 
 	}
 
-	GPIO_PinState CurrentIntPin = GPIO_PIN_RESET, PrevIntPin = GPIO_PIN_RESET;
 	float altitude = 0;
 	while (1)
 	{
-		CurrentIntPin = HAL_GPIO_ReadPin(BMP390_INT_GPIO_Port, BMP390_INT_Pin);
-		if (CurrentIntPin == GPIO_PIN_SET && PrevIntPin == GPIO_PIN_RESET)
+		if (bmp390_interrupt_triggered == true)
 		{
+			// read temperature(C) and pressure(Pa) data
 			baro.GetTemperatureAndPressure(Temperature, Pressure);
+			// get estimated altitude in meters
 			altitude = baro.GetAltitude(Pressure);
+			bmp390_interrupt_triggered = false;
 		}
-		PrevIntPin = CurrentIntPin;
 	}
 }
+
+BMP390_RET_TYPE BMP390_I2CRead(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
+{
+	BMP390_RET_TYPE ret = HAL_ERROR;
+	ret = HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+	if (ret == HAL_TIMEOUT)
+		ret = HAL_ERROR;
+	return ret;
+}
+
+BMP390_RET_TYPE BMP390_I2CWrite(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
+{
+	BMP390_RET_TYPE ret = HAL_ERROR;
+	ret = HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+	if (ret == HAL_TIMEOUT)
+		ret = HAL_ERROR;
+	return ret;
+}
+
 ```
