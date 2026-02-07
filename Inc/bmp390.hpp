@@ -10,9 +10,10 @@
 
 #include "bmp390-port.hpp"
 #include "bmp390-reg.hpp"
+#include "assert.h"
 
-typedef BMP390_RET_TYPE (*BMP390_ReadFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
-typedef BMP390_RET_TYPE (*BMP390_WriteFuncPtr)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
+using BMP390_ReadFuncPtr = BMP390_RET_TYPE (*)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
+using BMP390_WriteFuncPtr = BMP390_RET_TYPE (*)(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len);
 
 class BMP390 {
 	private:
@@ -21,7 +22,7 @@ class BMP390 {
 		BMP390_WriteFuncPtr write;
 
 		uint8_t chipAddress;
-
+		bool IsParamValid = false;
 		double ParT1;
 		double ParT2;
 		double ParT3;
@@ -60,6 +61,10 @@ class BMP390 {
 			ParP9 = 0;
 			ParP10 = 0;
 			ParP11 = 0;
+
+			assert((this->hInterface != nullptr && this->read != nullptr && this->write != nullptr));
+
+			if (this->hInterface != nullptr && this->read != nullptr && this->write != nullptr) IsParamValid = true;
 		}
 
 		void Init(bool CSBPinState, bool SDOPinState);
@@ -78,6 +83,6 @@ class BMP390 {
 		BMP390_RET_TYPE GetDrdySource(bmp390::DrdySource &src);
 		BMP390_RET_TYPE GetTemperature(double &Temperature);
 		BMP390_RET_TYPE GetTemperatureAndPressure(double &Temperature, double &Pressure);
-		float GetAltitude(double &Pressure);
+		float GetAltitude(double Pressure) const;
 };
 #endif /* BMP390_HPP_ */

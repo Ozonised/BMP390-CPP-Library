@@ -43,6 +43,9 @@ BMP390_RET_TYPE BMP390::IsPresent(void)
 {
 	uint8_t chipId = 0, revId = 0, ret = BMP390_RET_TYPE_FAILURE;
 
+	if (IsParamValid == false)
+		return ret;
+
 	if (read(hInterface, chipAddress, bmp390::REG_CHIP_ID, &chipId, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		if (read(hInterface, chipAddress, bmp390::REG_REV_ID, &revId, 1) == BMP390_RET_TYPE_SUCCESS)
@@ -73,6 +76,9 @@ BMP390_RET_TYPE BMP390::SetPowerMode(bmp390::PowerMode mode)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t pwrCtrl = 0;
+
+	if (IsParamValid == false)
+		return ret;
 
 	if (read(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
@@ -116,6 +122,9 @@ BMP390_RET_TYPE BMP390::ToggleTemperatureAndPressureMeasurement(bool TempEn, boo
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t pwrCtrl = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	if (read(hInterface, chipAddress, bmp390::REG_PWR_CTRL, &pwrCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		if (TempEn == true)
@@ -153,11 +162,14 @@ BMP390_RET_TYPE BMP390::SetPressureOversampling(bmp390::TempPressOversampling os
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t osr = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	if (read(hInterface, chipAddress, bmp390::REG_OSR, &osr, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		osr &= ~(bmp390::REG_OSR_OSR_P_0 | bmp390::REG_OSR_OSR_P_1 | bmp390::REG_OSR_OSR_P_2);
 
-		osr |= (static_cast<uint8_t>(osrp) <<bmp390::REG_OSR_OSR_P_POS);
+		osr |= (static_cast<uint8_t>(osrp) << bmp390::REG_OSR_OSR_P_POS);
 
 		ret = write(hInterface, chipAddress, bmp390::REG_OSR, &osr, 1);
 	}
@@ -183,6 +195,9 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t osr = 0;
+
+	if (IsParamValid == false)
+		return ret;
 
 	if (read(hInterface, chipAddress, bmp390::REG_OSR, &osr, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
@@ -216,8 +231,15 @@ BMP390_RET_TYPE BMP390::SetTemperatureOversampling(bmp390::TempPressOversampling
  */
 BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 {
+	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t ODR = static_cast<uint8_t>(odr);
-	return write(hInterface, chipAddress, bmp390::REG_ODR, &ODR, 1);
+
+	if (IsParamValid == false)
+		return ret;
+
+	ret = write(hInterface, chipAddress, bmp390::REG_ODR, &ODR, 1);
+
+	return ret;
 }
 
 /**
@@ -235,7 +257,12 @@ BMP390_RET_TYPE BMP390::SetOutputDataRate(bmp390::TempPressODR odr)
 BMP390_RET_TYPE BMP390::GetStatus(uint8_t &status)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
+
+	if (IsParamValid == false)
+		return ret;
+
 	ret = read(hInterface, chipAddress, bmp390::REG_STATUS, &status, 1);
+
 	return ret;
 }
 
@@ -253,6 +280,10 @@ BMP390_RET_TYPE BMP390::IsBusy(void)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t status = 0;
+
+	if (IsParamValid == false)
+		return ret;
+
 	if (GetStatus(status) == BMP390_RET_TYPE_SUCCESS)
 	{
 		if (status & bmp390::REG_STATUS_CMD_RDY)
@@ -294,6 +325,9 @@ BMP390_RET_TYPE BMP390::GetDrdySource(bmp390::DrdySource &src)
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t status = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	ret = GetStatus(status);
 
 	if (ret == BMP390_RET_TYPE_SUCCESS)
@@ -333,6 +367,9 @@ BMP390_RET_TYPE BMP390::SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient coe
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t config = 0;
+
+	if (IsParamValid == false)
+		return ret;
 
 	if (read(hInterface, chipAddress, bmp390::REG_CONFIG, &config, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
@@ -376,6 +413,9 @@ BMP390_RET_TYPE BMP390::ConfigInterruptPin(bool od, bool level, bool latch)
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t IntCtrl = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	if (read(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		IntCtrl = od ? (IntCtrl | bmp390::REG_INT_CTRL_INT_OD) : (IntCtrl & ~(bmp390::REG_INT_CTRL_INT_OD));
@@ -418,6 +458,9 @@ BMP390_RET_TYPE BMP390::SetInterruptSource(bool TempPress, bool FifoFull, bool F
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t IntCtrl = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	if (read(hInterface, chipAddress, bmp390::REG_INT_CTRL, &IntCtrl, 1) == BMP390_RET_TYPE_SUCCESS)
 	{
 		IntCtrl = TempPress ? (IntCtrl | bmp390::REG_INT_CTRL_DRDY_EN) : (IntCtrl & ~(bmp390::REG_INT_CTRL_DRDY_EN));
@@ -451,6 +494,9 @@ BMP390_RET_TYPE BMP390::GetInterruptSource(bmp390::InterruptSource &src)
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t IntStatus = 0;
 
+	if (IsParamValid == false)
+		return ret;
+
 	ret = read(hInterface, chipAddress, bmp390::REG_INT_STATUS, &IntStatus, 1);
 	if (ret == BMP390_RET_TYPE_SUCCESS)
 	{
@@ -483,6 +529,9 @@ BMP390_RET_TYPE BMP390::ReadNVM(void)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t NvmPar[21];
+
+	if (IsParamValid == false)
+		return ret;
 
 	ret = read(hInterface, chipAddress, bmp390::REG_NVM_PAR_START, NvmPar, 21);
 
@@ -547,7 +596,7 @@ double BMP390::CompensateTemperature(uint32_t UncompTemp)
 	double PartialData1 = static_cast<double>(UncompTemp) - ParT1;
 	double PartialData2 = PartialData1 * ParT2;
 	/* Update the compensated temperature in structure since this is
-	* needed for pressure calculation */
+	 * needed for pressure calculation */
 	double TempLin = PartialData2 + (PartialData1 * PartialData1) * ParT3;
 	/* Returns compensated temperature */
 	return TempLin;
@@ -575,6 +624,10 @@ BMP390_RET_TYPE BMP390::GetTemperature(double &Temperature)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
 	uint8_t RawData[3];
+
+	if (IsParamValid == false)
+		return ret;
+
 	ret = read(hInterface, chipAddress, bmp390::REG_DATA_3, RawData, 3);
 
 	if (ret == BMP390_RET_TYPE_SUCCESS)
@@ -669,8 +722,11 @@ double BMP390::CompensatePressure(uint32_t UncompPress, double TempLin)
 BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &Pressure)
 {
 	BMP390_RET_TYPE ret = BMP390_RET_TYPE_FAILURE;
-
 	uint8_t RawData[6];
+
+	if (IsParamValid == false)
+		return ret;
+
 	ret = read(hInterface, chipAddress, bmp390::REG_DATA_0, RawData, 6);
 
 	if (ret == BMP390_RET_TYPE_SUCCESS)
@@ -709,7 +765,7 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
  * @see BMP390::GetPressure
  * @see https://www.mide.com/air-pressure-at-altitude-calculator
  */
-float BMP390::GetAltitude(double &Pressure)
+float BMP390::GetAltitude(double Pressure) const
 {
 	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101323.5f), 0.19026f));
 }
