@@ -29,20 +29,26 @@ Now in the main file, create the definitions for the read and write functions:
 BMP390_RET_TYPE BMP390_I2CRead(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
 {
 	BMP390_RET_TYPE ret = HAL_ERROR;
-	ret = HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
-			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
-	if (ret == HAL_TIMEOUT)
-		ret = HAL_ERROR;
+	if (hInterface != nullptr)
+	{
+		ret = HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+				static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+		if (ret == HAL_TIMEOUT)
+			ret = HAL_ERROR;
+	}
 	return ret;
 }
 
 BMP390_RET_TYPE BMP390_I2CWrite(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
 {
 	BMP390_RET_TYPE ret = HAL_ERROR;
-	ret = HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
-			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
-	if (ret == HAL_TIMEOUT)
-		ret = HAL_ERROR;
+	if (hInterface != nullptr)
+	{
+		ret = HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+				static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+		if (ret == HAL_TIMEOUT)
+			ret = HAL_ERROR;
+	}
 	return ret;
 }
 ```
@@ -170,24 +176,29 @@ int main(void)
 		}
 	}
 }
-
 BMP390_RET_TYPE BMP390_I2CRead(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
 {
 	BMP390_RET_TYPE ret = HAL_ERROR;
-	ret = HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
-			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
-	if (ret == HAL_TIMEOUT)
-		ret = HAL_ERROR;
+	if (hInterface != nullptr)
+	{
+		ret = HAL_I2C_Mem_Read(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+				static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+		if (ret == HAL_TIMEOUT)
+			ret = HAL_ERROR;
+	}
 	return ret;
 }
 
 BMP390_RET_TYPE BMP390_I2CWrite(void *hInterface, uint8_t chipAddr, uint8_t reg, uint8_t *buf, uint8_t len)
 {
 	BMP390_RET_TYPE ret = HAL_ERROR;
-	ret = HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
-			static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
-	if (ret == HAL_TIMEOUT)
-		ret = HAL_ERROR;
+	if (hInterface != nullptr)
+	{
+		ret = HAL_I2C_Mem_Write(static_cast<I2C_HandleTypeDef*>(hInterface), static_cast<uint16_t>(chipAddr << 1),
+				static_cast<uint16_t>(reg), 1U, buf, static_cast<uint16_t>(len), 2U);
+		if (ret == HAL_TIMEOUT)
+			ret = HAL_ERROR;
+	}
 	return ret;
 }
 
