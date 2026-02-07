@@ -752,7 +752,10 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
  *
  * @param[in] Pressure Atmospheric pressure in Pascals (Pa).
  *
- * @return Altitude in meters above mean sea level (m).
+ * @return Altitude in meters above mean sea level (m) or NAN if pres
+ *
+ * @retval NAN Returned if the input pressure is zero or negative,
+ *             indicating an invalid or undefined altitude.
  *
  * @note The computed altitude is sensitive to the reference sea-level
  *       pressure. For improved accuracy, especially under changing
@@ -767,5 +770,8 @@ BMP390_RET_TYPE BMP390::GetTemperatureAndPressure(double &Temperature, double &P
  */
 float BMP390::GetAltitude(double Pressure) const
 {
+	if (Pressure <= 0.0f)
+		return NAN;
+
 	return 44330.0f * (1 - powf((static_cast<float>(Pressure) / 101323.5f), 0.19026f));
 }
