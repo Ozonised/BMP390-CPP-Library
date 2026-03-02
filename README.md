@@ -102,66 +102,47 @@ int main(void)
 		;
 
 	ret = baro.ReadNVM();
-	if (ret == HAL_OK)
-	{
-		// set normal mode
-		ret = baro.SetPowerMode(bmp390::PowerMode::Normal);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// set pressure oversampling to x8
-		ret = baro.SetPressureOversampling(bmp390::TempPressOversampling::x8);
+	// set pressure oversampling to x8
+	ret = baro.SetPressureOversampling(bmp390::TempPressOversampling::x8);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// set temperature oversampling to x8
-		ret = baro.SetTemperatureOversampling(bmp390::TempPressOversampling::x1);
+	// set temperature oversampling to x8
+	ret = baro.SetTemperatureOversampling(bmp390::TempPressOversampling::x1);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// set output data rate to 50Hz
-		ret = baro.SetOutputDataRate(bmp390::TempPressODR::ODR_50Hz);
+	// set output data rate to 50Hz
+	ret = baro.SetOutputDataRate(bmp390::TempPressODR::ODR_50Hz);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// set IIR filter coefficient 3/(binary value = 2)
-		ret = baro.SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient::coef3);
+	// set IIR filter coefficient 3/(binary value = 2)
+	ret = baro.SetIIRFilterCoefficient(bmp390::IIRFilterCoefficient::coef3);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// enable temperature and pressure data ready interrupt
-		ret = baro.SetInterruptSource(1, 0, 0);
+	// enable temperature and pressure data ready interrupt
+	ret = baro.SetInterruptSource(1, 0, 0);
 
-		// wait if device is busy or the read/write operation failed
-		do
-		{
-			ret = baro.IsBusy();
-		} while (ret == HAL_BUSY || ret == HAL_ERROR);
+	while (ret != HAL_OK)
+		;
 
-		// enable temperature and pressure measurement
-		ret = baro.ToggleTemperatureAndPressureMeasurement(1, 1);
+	// enable temperature and pressure measurement
+	ret = baro.ToggleTemperatureAndPressureMeasurement(1, 1);
+	while (ret != HAL_OK)
+		;
 
-	}
+	// set normal mode, set the power mode after all confriguration
+	ret = baro.SetPowerMode(bmp390::PowerMode::Normal);
 
 	float altitude = 0;
 	while (1)
